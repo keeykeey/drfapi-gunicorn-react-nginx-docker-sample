@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  backend:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: ./DockerfileBackend
+    volumes:
+      - staticfiles:/staticfiles
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: ./frontend/
+      dockerfile: DockerfileFrontend
+    volumes:
+      - ./frontend:/dockerFrontend
+      - app_build_folder:/dockerFrontend/build
+    command: yarn build
+    ports:
+      - "3000:3000"
+
+  nginx:
+    build:
+      context: ./nginx/
+      dockerfile: DockerfileNginx
+    volumes:
+      - staticfiles:/staticfiles
+      - app_build_folder:/var/www/
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  app_build_folder:
+  staticfiles:
